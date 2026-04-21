@@ -16,7 +16,7 @@ multi::{many0}};
 /// parses a solution electron in the form 'e(PhaseName)'
 pub fn parse_electron(input: &str)->IResult<&str,Element>{
 	let (input, _) = tag("e(")(input)?;
-	let (input, phase) = take_while(|c: char| c.is_alphanumeric())(input)?;
+	let (input, phase) = take_while(|c: char| c.is_alphanumeric() || c == '#' || c == '-' || c == '_')(input)?;
 	let (input, _) = tag(")")(input)?;
 	return Ok((input, Element::e(String::from(phase))));
 }
@@ -24,6 +24,7 @@ pub fn parse_electron(input: &str)->IResult<&str,Element>{
 /// parses an element from a string
 pub fn parse_element(input: &str)->IResult<&str,Element>{
 	if input.len() < 1 {return fail("insufficient length")}
+	//if input.len() < 1 {return fail(input)}
 	if input.len() > 1 {
 		match Element::from_str(&input[0..2]) {
 			Ok(element) => {return Ok((&input[2..],element));}
@@ -36,29 +37,31 @@ pub fn parse_element(input: &str)->IResult<&str,Element>{
 		Ok(element) => {return Ok((&input[1..],element));}
 		Err(_) => {
 			return fail("Cannot parse an element");
+			//return fail(input);
 		}
 	}
 }
 
 /// parses an integer coefficient from a string, such as 2, 5, etc.
-pub fn parse_coeff(input: &str)->IResult<&str,u32>{
-	let (input, res) = take_while(|c: char| c.is_numeric())(input)?;
+pub fn parse_coeff(input: &str)->IResult<&str,f64>{
+	let (input, res) = take_while(|c: char| c.is_numeric() || c == '.')(input)?;
 	match res.len() {
-		0 => {return Ok((input, 1u32));}
+		0 => {return Ok((input, 1.0f64));}
 		_ => {
-			match u32::from_str(res){
+			match f64::from_str(res){
 				Ok(res_num) => {
 					return Ok((input, res_num));
 				}
 				Err(_) => {
 					return fail("Cannot parse coefficient");
+					//return fail(input);
 				}
 			}
 		}
 	}
 }
 /// parses an element/coefficient group, such as Na2, Ca, H3, etc.
-pub fn parse_element_coeff(input: &str)->IResult<&str,(Element, u32)>{
+pub fn parse_element_coeff(input: &str)->IResult<&str,(Element, f64)>{
 	let (input, res) = pair(parse_element, parse_coeff)(input)?;
 	return Ok((input, res));
 }

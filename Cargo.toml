@@ -4,9 +4,14 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 keywords = ["chemistry", "parsing", "chemical formulas"]
+author = "Evgenii Nekhoroshev e.nekhoroshev@uq.edu.au, evgnekhoroshev@gmail.com"
+description = "A very simple parser of chemical formulas for ChemApp datafiles; no parentheses, integer element coefficients only."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nom = "*"
-nalgebra = "0.32.*"
+nom = "7.1.*"
+nalgebra = "*"
+strum = "*"
+strum_macros = "*"
+num_enum = "*"

@@ -1,10 +1,15 @@
 // element.rs
 
+use std::fmt::{Debug};
 use std::str::FromStr;
+use strum_macros::AsRefStr;
+use strum_macros::EnumIter;
+//use num_enum::TryFromPrimitive;
 use crate::parse::{parse_electron};
 
 /// Enum representing a chemical element. Includes vacancies (Va), and e(phase_name) electrons for charge balance of solutions with charged endmembers.
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash, AsRefStr, EnumIter)]
+#[repr(u8)]
 pub enum Element {
 	e(String),
 	Va,
@@ -18,6 +23,30 @@ pub enum Element {
 	Cs, Ba, La, Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb, Lu, Hf, Ta, W, Re, Os, Ir, Pt,
 	Au, Hg, Tl, Pb, Bi, Po, At, Rn,
 	Fr, Ra, Ac, Th, Pa, U, Np, Pu, Am, Cm, Bk, Cf, Es, Fm, Md, No, Lr, Rf, Db, Sg, Bh, Hs,
+}
+
+const ELEMENTS_ALL : [Element; 109] = [Element::Va,Element::H,Element::He,Element::Li,Element::Be,Element::B,Element::C,Element::N,Element::O,Element::F,Element::Ne,
+									   Element::Na,Element::Mg,Element::Al,Element::Si,Element::P,Element::S,Element::Cl,Element::Ar,Element::K,Element::Ca,
+									   Element::Sc, Element::Ti, Element::V, Element::Cr, Element::Mn, Element::Fe, Element::Co, Element::Ni,Element::Cu,
+									   Element::Zn, Element::Ga, Element::Ge, Element::As, Element::Se, Element::Br, Element::Kr,Element::Rb,Element::Sr,Element::Y,
+									   Element::Zr, Element::Nb, Element::Mo, Element::Tc, Element::Ru, Element::Rh, Element::Pd,Element::Ag,Element::Cd,Element::In,
+									   Element::Sn,Element::Sb,Element::Te,Element::I,Element::Xe,Element::Cs,Element::Ba,Element::La,Element::Ce,Element::Pr,Element::Nd,
+									   Element::Pm,Element::Sm,Element::Eu,Element::Gd,Element::Tb,Element::Dy,Element::Ho,Element::Er,Element::Tm,Element::Yb,Element::Lu,
+									   Element::Hf,Element::Ta,Element::W,Element::Re,Element::Os,Element::Ir,Element::Pt,Element::Au,Element::Hg,Element::Tl,Element::Pb,
+									   Element::Bi,Element::Po,Element::At,Element::Rn,Element::Fr,Element::Ra,Element::Ac,Element::Th,Element::Pa,Element::U,Element::Np,
+									   Element::Pu,Element::Am,Element::Cm,Element::Bk,Element::Cf,Element::Es,Element::Fm,Element::Md,Element::No,Element::Lr,Element::Rf,
+									   Element::Db,Element::Sg,Element::Bh,Element::Hs,];
+
+impl TryFrom<usize> for Element {
+	type Error = String;
+	
+	fn try_from(value: usize)->Result<Self,Self::Error> {
+		if value < ELEMENTS_ALL.len(){
+			return Ok(ELEMENTS_ALL[value].clone());
+		}
+		return Err(format!("Invalid element index {}", &value));
+	}
+	
 }
 
 impl FromStr for Element {
@@ -263,4 +292,121 @@ impl Element {
 			Element::Hs => {return 277.0;}
 		}
 	}
+	
+	
+	pub fn index(&self)->usize {
+		match self {
+			Element::e(_) => {return 0;}
+			Element::Va => {return 0;}
+			Element::H  => {return 1;}
+			Element::He => {return 2;}
+			Element::Li => {return 3;}
+			Element::Be => {return 4;}
+			Element::B  => {return 5;}
+			Element::C  => {return 6;}
+			Element::N  => {return 7;}
+			Element::O  => {return 8;}
+			Element::F  => {return 9;}
+			Element::Ne => {return 10;}
+			Element::Na => {return 11;}
+			Element::Mg => {return 12;}
+			Element::Al => {return 13;}
+			Element::Si => {return 14;}
+			Element::P  => {return 15;}
+			Element::S  => {return 16;}
+			Element::Cl => {return 17;}
+			Element::Ar => {return 18;}
+			Element::K  => {return 19;}
+			Element::Ca => {return 20;}
+			Element::Sc => {return 21;}
+			Element::Ti => {return 22;}
+			Element::V  => {return 23;}
+			Element::Cr => {return 24;}
+			Element::Mn => {return 25;}
+			Element::Fe => {return 26;}
+			Element::Co => {return 27;}
+			Element::Ni => {return 28;}
+			Element::Cu => {return 29;}
+			Element::Zn => {return 30;}
+			Element::Ga => {return 31;}
+			Element::Ge => {return 32;}
+			Element::As => {return 33;}
+			Element::Se => {return 34;}
+			Element::Br => {return 35;}
+			Element::Kr => {return 36;}
+			Element::Rb => {return 37;}
+			Element::Sr => {return 38;}
+			Element::Y  => {return 39;}
+			Element::Zr => {return 40;}
+			Element::Nb => {return 41;}
+			Element::Mo => {return 42;}
+			Element::Tc => {return 43;}
+			Element::Ru => {return 44;}
+			Element::Rh => {return 45;}
+			Element::Pd => {return 46;}
+			Element::Ag => {return 47;}
+			Element::Cd => {return 48;}
+			Element::In => {return 49;}
+			Element::Sn => {return 50;}
+			Element::Sb => {return 51;}
+			Element::Te => {return 52;}
+			Element::I  => {return 53;}
+			Element::Xe => {return 54;}
+			Element::Cs => {return 55;}
+			Element::Ba => {return 56;}
+			Element::La => {return 57;}
+			Element::Ce => {return 58;}
+			Element::Pr => {return 59;}
+			Element::Nd => {return 60;}
+			Element::Pm => {return 61;}
+			Element::Sm => {return 62;}
+			Element::Eu => {return 63;}
+			Element::Gd => {return 64;}
+			Element::Tb => {return 65;}
+			Element::Dy => {return 66;}
+			Element::Ho => {return 67;}
+			Element::Er => {return 68;}
+			Element::Tm => {return 69;}
+			Element::Yb => {return 70;}
+			Element::Lu => {return 71;}
+			Element::Hf => {return 72;}
+			Element::Ta => {return 73;}
+			Element::W  => {return 74;}
+			Element::Re => {return 75;}
+			Element::Os => {return 76;}
+			Element::Ir => {return 77;}
+			Element::Pt => {return 78;}
+			Element::Au => {return 79;}
+			Element::Hg => {return 80;}
+			Element::Tl => {return 81;}
+			Element::Pb => {return 82;}
+			Element::Bi => {return 83;}
+			Element::Po => {return 84;}
+			Element::At => {return 85;}
+			Element::Rn => {return 86;}
+			Element::Fr => {return 87;}
+			Element::Ra => {return 88;}
+			Element::Ac => {return 89;}
+			Element::Th => {return 90;}
+			Element::Pa => {return 91;}
+			Element::U  => {return 92;}
+			Element::Np => {return 93;}
+			Element::Pu => {return 94;}
+			Element::Am => {return 95;}
+			Element::Cm => {return 96;}
+			Element::Bk => {return 97;}
+			Element::Cf => {return 98;}
+			Element::Es => {return 99;}
+			Element::Fm => {return 100;}
+			Element::Md => {return 101;}
+			Element::No => {return 102;}
+			Element::Lr => {return 103;}
+			Element::Rf => {return 104;}
+			Element::Db => {return 105;}
+			Element::Sg => {return 106;}
+			Element::Bh => {return 107;}
+			Element::Hs => {return 108;}
+		}
+	}
+	
 }

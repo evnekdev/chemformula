@@ -6,16 +6,18 @@ use std::ops::{MulAssign, Mul, AddAssign, Add};
 use crate::{parse::{parse_electron, parse_element_coeff_group}, Element};
 
 /// A structure representing a chemical formula, i.e. a ordered set of pairs (Element, coefficient) + a charge value.
+#[derive(Clone)]
 pub struct Formula {
-	pub pairs: Vec<(Element, u32)>,
-	pub charge: i32,
+	//pub pairs: Vec<(Element, u32)>,
+	pub pairs: Vec<(Element, f64)>,
+	pub charge: f64,
 }
 
 impl Formula {
 	pub fn new()->Formula{
 		return Formula{
 			pairs: Vec::new(),
-			charge: 0,
+			charge: 0.0,
 		};
 	}
 	
@@ -28,13 +30,13 @@ impl Formula {
 		return wm;
 	}
 	/// returns a stoichiometry coefficient for an element; 0 if the element is not contained in the formula
-	pub fn coeff(&self, element: &Element)->u32{
+	pub fn coeff(&self, element: &Element)->f64{
 		for (key, value) in self.pairs.iter(){
 			if key == element {
 				return *value;
 			}
 		}
-		return 0;
+		return 0.0;
 	}
 }
 /*************************************************************************************************/
@@ -44,11 +46,11 @@ impl From<Element> for Formula {
 		let mut frm = Formula::new();
 		match element {
 			Element::e(_)=> {
-				frm.charge -= 1;
+				frm.charge -= 1.0;
 			}
 			_ => {}
 		}
-		frm.pairs.push((element, 1u32));
+		frm.pairs.push((element, 1.0f64));
 		return frm;
 	}
 }
@@ -70,7 +72,7 @@ impl FromStr for Formula {
 				return Ok(Formula::from(electron));
 			}
 			Err(_) => {
-				return Err(String::from("cannot parse the string"));
+				return Err(format!("cannot parse the string {:?}", input));
 			}
 		}
 	}
@@ -80,37 +82,37 @@ impl fmt::Debug for Formula {
 	fn fmt(&self, f: &mut fmt::Formatter)->fmt::Result{
 		for (key, value) in self.pairs.iter(){
 			let string;
-			if *value == 1 {
+			if *value == 1.0 {
 				string = format!("{:?}", key);
 			} else {
 				string = format!("{:?}{:?}", key, value);
 			}
 			f.write_str(&string)?;
 		}
-		if self.charge != 0 {
+		if self.charge != 0.0 {
 			f.write_str(&format!("[{}]", self.charge))?;
 		}
 		return Ok(());
 	}
 }
 
-impl MulAssign<u32> for Formula {
-	fn mul_assign(&mut self, rhs: u32){
+impl MulAssign<f64> for Formula {
+	fn mul_assign(&mut self, rhs: f64){
 		for (key, value) in self.pairs.iter_mut(){
 			*value *= rhs;
 		}
-		self.charge *= rhs as i32;
+		self.charge *= rhs;
 	}
 }
 
-impl Mul<u32> for Formula {
+impl Mul<f64> for Formula {
 	type Output = Formula;
-	fn mul(self, rhs: u32)->Self::Output{
+	fn mul(self, rhs: f64)->Self::Output{
 		let mut res = Formula::new();
 		for (key, value) in self.pairs.iter(){
 			res.pairs.push((key.clone(), value*rhs));
 		}
-		res.charge = self.charge * rhs as i32;
+		res.charge = self.charge * rhs as f64;
 		return res;
 	}
 }

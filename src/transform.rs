@@ -6,11 +6,14 @@ use crate::{conversion_matrix_s};
 
 const THRESHOLD : f64 = 1e-12;
 
+#[derive(Debug)]
 pub struct Transform{
 	basis_i: Vec<String>, // initial (atomic)
 	basis_f: Vec<String>, // final (end members)
-	pub f2i: Matrix<f64,Dyn,Dyn,VecStorage<f64,Dyn,Dyn>>,
-	pub i2f: Matrix<f64,Dyn,Dyn,VecStorage<f64,Dyn,Dyn>>,
+	//pub f2i: Matrix<f64,Dyn,Dyn,VecStorage<f64,Dyn,Dyn>>,
+	//pub i2f: Matrix<f64,Dyn,Dyn,VecStorage<f64,Dyn,Dyn>>,
+	pub f2i: DMatrix<f64>,
+	pub i2f: DMatrix<f64>,
 }
 
 fn check_vector_d(vec: &mut DVector<f64>){
@@ -31,6 +34,15 @@ impl Transform {
 			f2i : conversion_matrix_s(list2, list1),
 		};
 	}
+	
+	pub fn number_i(&self)->usize{
+		return self.basis_i.len();
+	}
+	
+	pub fn number_f(&self)->usize{
+		return self.basis_f.len();
+	}
+	
 	/// apply transform final-to-initial, dyn-to-dyn
 	pub fn transform_f2i_d2d(&self, x_f: &DVector<f64>)->DVector<f64>{
 		let mut res = &self.f2i * x_f;
