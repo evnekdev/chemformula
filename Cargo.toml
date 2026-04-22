@@ -11,7 +11,7 @@ description = "A very simple parser of chemical formulas for ChemApp datafiles; 
 
 [dependencies]
 nom = "7.1.*"
-nalgebra = "*"
-strum = "*"
-strum_macros = "*"
-num_enum = "*"
+nalgebra = "0.32"
+strum = "0.28"
+strum_macros = "0.28"
+num_enum = "0.7"
