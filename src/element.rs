@@ -1,10 +1,11 @@
 // element.rs
 
+//! This submodule defines a Rust enum representing all possible chemical elements. Important note - since this crate is heavily used for thermochemical computations, `fake` elements such as e(Phase Name) and  Va are added. Va stands for a Vacancy (an essential component of many multisublattice solid solutions modeled by Compound Energy Formalism) and CEF requires addition of in-phase electrons as a system component.
+
 use std::fmt::{Debug};
 use std::str::FromStr;
 use strum_macros::AsRefStr;
 use strum_macros::EnumIter;
-//use num_enum::TryFromPrimitive;
 use crate::parse::{parse_electron};
 
 /// Enum representing a chemical element. Includes vacancies (Va), and e(phase_name) electrons for charge balance of solutions with charged endmembers.
@@ -178,6 +179,8 @@ impl FromStr for Element {
 }
 
 impl Element {
+	
+	/// Returns the atomic mass
 	pub fn wmass(&self)->f64{
 		match self {
 			Element::e(_) => {return 0.0;}
@@ -293,7 +296,7 @@ impl Element {
 		}
 	}
 	
-	
+	/// Returns the index number in the Periodic Table
 	pub fn index(&self)->usize {
 		match self {
 			Element::e(_) => {return 0;}

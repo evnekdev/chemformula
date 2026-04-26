@@ -1,5 +1,7 @@
 // transform.rs
 
+//! An utility structure, `Transform` is introduced, to handle matrix transformation of one composition set (for example, ['CaO', 'SiO2', 'MgO']) to another (['Ca', 'Mg', 'Si', 'O']). Very useful for practical engineering calculations.
+
 use nalgebra::{dvector, DVector, SVector, DMatrix, Matrix, DimName, Dim, Owned, Storage, VecStorage, U1, Dyn, constraint::{ShapeConstraint, DimEq, AreMultipliable}};
 
 use crate::{conversion_matrix_s};
@@ -7,11 +9,9 @@ use crate::{conversion_matrix_s};
 const THRESHOLD : f64 = 1e-12;
 
 #[derive(Debug)]
-pub struct Transform{
+pub struct Transform {
 	basis_i: Vec<String>, // initial (atomic)
 	basis_f: Vec<String>, // final (end members)
-	//pub f2i: Matrix<f64,Dyn,Dyn,VecStorage<f64,Dyn,Dyn>>,
-	//pub i2f: Matrix<f64,Dyn,Dyn,VecStorage<f64,Dyn,Dyn>>,
 	pub f2i: DMatrix<f64>,
 	pub i2f: DMatrix<f64>,
 }

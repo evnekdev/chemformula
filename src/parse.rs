@@ -1,5 +1,7 @@
 // parse.rs
 
+//! Collection of `nom`-based internal parsing routines which, combined, ensure the proper parsing of text strings into `Formula` objects.
+
 use crate::{Formula, Element};
 
 use std::str::FromStr;
@@ -37,7 +39,6 @@ pub fn parse_element(input: &str)->IResult<&str,Element>{
 		Ok(element) => {return Ok((&input[1..],element));}
 		Err(_) => {
 			return fail("Cannot parse an element");
-			//return fail(input);
 		}
 	}
 }
@@ -54,7 +55,6 @@ pub fn parse_coeff(input: &str)->IResult<&str,f64>{
 				}
 				Err(_) => {
 					return fail("Cannot parse coefficient");
-					//return fail(input);
 				}
 			}
 		}
@@ -73,7 +73,6 @@ pub fn parse_element_coeff_group(input: &str)->IResult<&str, Formula>{
 	for (element, coeff) in res {
 		let mut f = Formula::from(element);
 		f *= coeff;
-		//println!("element = {:?}, coeff = {}, f = {:?}", &element, coeff, &f);
 		frm += &f;
 	}
 	return Ok((input, frm));

@@ -1,6 +1,6 @@
 //lib.rs
 
-//! This crate helps to parse simple chemical formulas for ChemApp datafiles. The parser is built using [`nom`] crate functionality. For now, the parsing functionality is limited to parsing simple formulas without parentheses and with integer coefficients for elements.
+//! This crate helps to parse simple chemical formulas. Its original purpose was to facilitate composition calculations for thermochemical calculations using ChemApp, but it might be useful for general purposes as well. The parser is built using [`nom`] crate functionality. For now, the parsing functionality is limited to parsing simple formulas without parentheses and with float coefficients for elements.
 
 pub mod element;
 pub mod formula;
@@ -18,9 +18,6 @@ use std::convert::From;
 
 use nalgebra::{DVector, dvector, DMatrix, dmatrix};
 
-
-
-
 /*************************************************************************************************/
 /*************************************************************************************************/
 /// Derives an ordered set of all elements occurring in a vector of [`Formula`] structures.
@@ -36,8 +33,6 @@ fn element_set(basis: &[Formula])->BTreeSet<Element>{
 
 /// Builds a conversion matrix (as a [`DMatrix<f64>`]) for conversion from one set of [`Formula`] to another one.
 pub fn conversion_matrix_f(basis_from: &[Formula], basis_to: &[Formula])->DMatrix<f64>{
-	//let eset_from = element_set(basis_from);
-	//let eset_to   = element_set(basis_to);
 	let mut eset : BTreeSet<Element> = BTreeSet::new();
 	for k in 0..basis_from.len(){
 		for (key, _) in basis_from[k].pairs.iter(){

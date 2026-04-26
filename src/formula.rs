@@ -1,5 +1,7 @@
 // formula.rs
 
+//! `Formula` struct handles parsing formula names.
+
 use std::fmt;
 use std::str::FromStr;
 use std::ops::{MulAssign, Mul, AddAssign, Add};
@@ -8,12 +10,12 @@ use crate::{parse::{parse_electron, parse_element_coeff_group}, Element};
 /// A structure representing a chemical formula, i.e. a ordered set of pairs (Element, coefficient) + a charge value.
 #[derive(Clone)]
 pub struct Formula {
-	//pub pairs: Vec<(Element, u32)>,
 	pub pairs: Vec<(Element, f64)>,
 	pub charge: f64,
 }
 
 impl Formula {
+	/// Initializes an empty formula
 	pub fn new()->Formula{
 		return Formula{
 			pairs: Vec::new(),
