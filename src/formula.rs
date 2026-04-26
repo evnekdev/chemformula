@@ -81,21 +81,29 @@ impl FromStr for Formula {
 }
 
 impl fmt::Debug for Formula {
-	fn fmt(&self, f: &mut fmt::Formatter)->fmt::Result{
-		for (key, value) in self.pairs.iter(){
-			let string;
-			if *value == 1.0 {
-				string = format!("{:?}", key);
-			} else {
-				string = format!("{:?}{:?}", key, value);
-			}
-			f.write_str(&string)?;
-		}
-		if self.charge != 0.0 {
-			f.write_str(&format!("[{}]", self.charge))?;
-		}
-		return Ok(());
-	}
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fn fmt_coeff(value: f64) -> String {
+            if value.fract() == 0.0 {
+                format!("{}", value as i64)
+            } else {
+                format!("{}", value)
+            }
+        }
+
+        for (key, value) in self.pairs.iter() {
+            if *value == 1.0 {
+                write!(f, "{:?}", key)?;
+            } else {
+                write!(f, "{:?}{}", key, fmt_coeff(*value))?;
+            }
+        }
+
+        if self.charge != 0.0 {
+            write!(f, "[{}]", fmt_coeff(self.charge))?;
+        }
+
+        Ok(())
+    }
 }
 
 impl MulAssign<f64> for Formula {

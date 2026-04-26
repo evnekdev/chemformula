@@ -2,10 +2,13 @@
 name = "chemformula"
 version = "0.1.0"
 edition = "2021"
-license = "MIT OR Apache-2.0"
-keywords = ["chemistry", "parsing", "chemical formulas"]
+license = "MIT"
 author = "Evgenii Nekhoroshev e.nekhoroshev@uq.edu.au, evgnekhoroshev@gmail.com"
-description = "A very simple parser of chemical formulas for ChemApp datafiles; no parentheses, integer element coefficients only."
+repository = "https://github.com/evnekdev/chemformula"
+readme = "README.md"
+description = "A very simple parser of chemical formulas for ChemApp datafiles; no parentheses, integer/fractional coefficients."
+keywords = ["chemistry", "formula", "parser", "scientific", "composition"]
+categories = ["science", "parser-implementations"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
