@@ -11,17 +11,16 @@ pub use crate::formula::{Formula};
 pub use crate::element::{Element};
 pub use crate::transform::{Transform};
 
-use std::fmt;
 use std::str::FromStr;
 use std::collections::{BTreeSet};
-use std::convert::From;
 
-use nalgebra::{DVector, dvector, DMatrix, dmatrix};
+use nalgebra::{DMatrix};
 
 /*************************************************************************************************/
 /*************************************************************************************************/
+
 /// Derives an ordered set of all elements occurring in a vector of [`Formula`] structures.
-fn element_set(basis: &[Formula])->BTreeSet<Element>{
+pub fn element_set(basis: &[Formula])->BTreeSet<Element>{
 	let mut eset : BTreeSet<Element> = BTreeSet::new();
 	for k in 0..basis.len(){
 		for (key, _) in basis[k].pairs.iter(){

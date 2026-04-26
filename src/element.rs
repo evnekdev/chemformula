@@ -12,7 +12,7 @@ use crate::parse::{parse_electron};
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash, AsRefStr, EnumIter)]
 #[repr(u8)]
 pub enum Element {
-	e(String),
+	E(String),
 	Va,
 	H,	He,
 	Li,	Be,	B,	C,	N,	O,	F,	Ne,
@@ -165,14 +165,13 @@ impl FromStr for Element {
 			"Hs" => {return Ok(Element::Hs);}
 			_ => {
 				match parse_electron(input){
-					Ok((input, electron)) => {
+					Ok((_, electron)) => {
 						return Ok(electron);
 					}
 					Err(_) => {
 						return Err(String::from("Cannot parse an element"));
 					}
 				}
-				return Err(String::from("Cannot parse an element"));
 			}
 		}
 	}
@@ -183,7 +182,7 @@ impl Element {
 	/// Returns the atomic mass
 	pub fn wmass(&self)->f64{
 		match self {
-			Element::e(_) => {return 0.0;}
+			Element::E(_) => {return 0.0;}
 			Element::Va => {return 0.0;}
 			Element::H  => {return 1.00794;}
 			Element::He => {return 4.002602;}
@@ -299,7 +298,7 @@ impl Element {
 	/// Returns the index number in the Periodic Table
 	pub fn index(&self)->usize {
 		match self {
-			Element::e(_) => {return 0;}
+			Element::E(_) => {return 0;}
 			Element::Va => {return 0;}
 			Element::H  => {return 1;}
 			Element::He => {return 2;}

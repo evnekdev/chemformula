@@ -7,7 +7,6 @@ use crate::{Formula, Element};
 use std::str::FromStr;
 use nom::{IResult,
 bytes::complete::{tag, take_while},
-character::{is_digit, is_alphabetic},
 combinator::{fail},
 sequence::{pair},
 multi::{many0}};
@@ -20,7 +19,7 @@ pub fn parse_electron(input: &str)->IResult<&str,Element>{
 	let (input, _) = tag("e(")(input)?;
 	let (input, phase) = take_while(|c: char| c.is_alphanumeric() || c == '#' || c == '-' || c == '_')(input)?;
 	let (input, _) = tag(")")(input)?;
-	return Ok((input, Element::e(String::from(phase))));
+	return Ok((input, Element::E(String::from(phase))));
 }
 
 /// parses an element from a string

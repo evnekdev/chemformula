@@ -2,7 +2,7 @@
 
 //! An utility structure, `Transform` is introduced, to handle matrix transformation of one composition set (for example, ['CaO', 'SiO2', 'MgO']) to another (['Ca', 'Mg', 'Si', 'O']). Very useful for practical engineering calculations.
 
-use nalgebra::{dvector, DVector, SVector, DMatrix, Matrix, DimName, Dim, Owned, Storage, VecStorage, U1, Dyn, constraint::{ShapeConstraint, DimEq, AreMultipliable}};
+use nalgebra::{DVector, SVector, DMatrix};
 
 use crate::{conversion_matrix_s};
 
@@ -71,25 +71,25 @@ impl Transform {
 	pub fn transform_f2i_d2s<const N: usize>(&self, x_f: &DVector<f64>)->SVector<f64,N>{
 		let mut res = &self.f2i * x_f;
 		check_vector_d(&mut res);
-		return SVector::from(res.fixed_slice::<N,1>(0,0));
+		return SVector::from(res.fixed_view::<N,1>(0,0));
 	}
 	/// apply transform initial-to-final, dyn-to-static
 	pub fn transform_i2f_d2s<const N: usize>(&self, x_i: &DVector<f64>)->SVector<f64,N>{
 		let mut res = &self.i2f * x_i;
 		check_vector_d(&mut res);
-		return SVector::from(res.fixed_slice::<N,1>(0,0));
+		return SVector::from(res.fixed_view::<N,1>(0,0));
 	}
 	/// apply transform final-to-initial, static-to-static
 	pub fn transform_f2i_s2s<const N1: usize, const N2: usize>(&self, x_f: &SVector<f64,N1>)->SVector<f64,N2>{
 		let mut res = &self.f2i * x_f;
 		check_vector_d(&mut res);
-		return SVector::from(res.fixed_slice::<N2,1>(0,0));
+		return SVector::from(res.fixed_view::<N2,1>(0,0));
 	}
 	/// apply transform initial-to-final, static-to-static
 	pub fn transform_i2f_s2s<const N1: usize, const N2: usize>(&self, x_i: &SVector<f64,N1>)->SVector<f64,N2>{
 		let mut res = &self.i2f * x_i;
 		check_vector_d(&mut res);
-		return SVector::from(res.fixed_slice::<N2,1>(0,0));
+		return SVector::from(res.fixed_view::<N2,1>(0,0));
 	}
 }
 

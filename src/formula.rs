@@ -47,7 +47,7 @@ impl From<Element> for Formula {
 	fn from(element: Element)->Self{
 		let mut frm = Formula::new();
 		match element {
-			Element::e(_)=> {
+			Element::E(_)=> {
 				frm.charge -= 1.0;
 			}
 			_ => {}
@@ -70,7 +70,7 @@ impl FromStr for Formula {
 			Err(_) => {}
 		}
 		match parse_electron(input){
-			Ok((input, electron)) => {
+			Ok((_, electron)) => {
 				return Ok(Formula::from(electron));
 			}
 			Err(_) => {
@@ -108,7 +108,7 @@ impl fmt::Debug for Formula {
 
 impl MulAssign<f64> for Formula {
 	fn mul_assign(&mut self, rhs: f64){
-		for (key, value) in self.pairs.iter_mut(){
+		for (_, value) in self.pairs.iter_mut(){
 			*value *= rhs;
 		}
 		self.charge *= rhs;

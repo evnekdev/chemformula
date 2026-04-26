@@ -1,7 +1,5 @@
 use std::str::FromStr;
-use nalgebra::{DVector, DMatrix, dvector};
-use nom::{IResult,
-bytes::complete::{tag}};
+use nalgebra::{dvector};
 use chemformula::*;
 
 pub fn main(){
