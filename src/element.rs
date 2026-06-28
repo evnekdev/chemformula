@@ -8,6 +8,9 @@ use strum_macros::AsRefStr;
 use strum_macros::EnumIter;
 use crate::parse::{parse_electron};
 
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
 /// Enum representing a chemical element. Includes vacancies (Va), and e(phase_name) electrons for charge balance of solutions with charged endmembers.
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash, AsRefStr, EnumIter)]
 #[repr(u8)]
@@ -26,6 +29,9 @@ pub enum Element {
 	Fr, Ra, Ac, Th, Pa, U, Np, Pu, Am, Cm, Bk, Cf, Es, Fm, Md, No, Lr, Rf, Db, Sg, Bh, Hs,
 }
 
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
 const ELEMENTS_ALL : [Element; 109] = [Element::Va,Element::H,Element::He,Element::Li,Element::Be,Element::B,Element::C,Element::N,Element::O,Element::F,Element::Ne,
 									   Element::Na,Element::Mg,Element::Al,Element::Si,Element::P,Element::S,Element::Cl,Element::Ar,Element::K,Element::Ca,
 									   Element::Sc, Element::Ti, Element::V, Element::Cr, Element::Mn, Element::Fe, Element::Co, Element::Ni,Element::Cu,
@@ -38,6 +44,9 @@ const ELEMENTS_ALL : [Element; 109] = [Element::Va,Element::H,Element::He,Elemen
 									   Element::Pu,Element::Am,Element::Cm,Element::Bk,Element::Cf,Element::Es,Element::Fm,Element::Md,Element::No,Element::Lr,Element::Rf,
 									   Element::Db,Element::Sg,Element::Bh,Element::Hs,];
 
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
 impl TryFrom<usize> for Element {
 	type Error = String;
 	
@@ -49,6 +58,9 @@ impl TryFrom<usize> for Element {
 	}
 	
 }
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
 
 impl FromStr for Element {
 	type Err = String;
@@ -176,6 +188,9 @@ impl FromStr for Element {
 		}
 	}
 }
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
 
 impl Element {
 	
@@ -412,3 +427,7 @@ impl Element {
 	}
 	
 }
+
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
