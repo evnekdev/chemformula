@@ -4,7 +4,7 @@
 
 use std::str::FromStr;
 use std::collections::{BTreeSet};
-use nalgebra::{DVector, DMatrix, Dim, Storage, Matrix};
+use nalgebra::{DMatrix, Dim, Storage, Matrix};
 use nom::{Err, error::{Error,ErrorKind}};
 
 use crate::formula::Formula;
