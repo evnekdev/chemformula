@@ -92,7 +92,7 @@ Please refer to the `/examples` folder to see how the crate functionality works.
 use chemformula::Element;
 
 // Example usage (depends on your API)
-let oxygen = Element::from_str("O");
+let oxygen = Element::from_str("O").unwrap();
 ```
 
 ---

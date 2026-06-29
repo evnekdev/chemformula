@@ -154,18 +154,25 @@ impl Mul<f64> for Formula {
 /*********************************************************************************************************************************/
 
 impl AddAssign<&Formula> for Formula {
-	fn add_assign(&mut self, rhs: &Formula){
-		for (key2, value2) in rhs.pairs.iter(){
-			for (key1, value1) in self.pairs.iter_mut(){
-				if key1 == key2{
-					*value1 += value2;
-					break;
-				}
-			}
-			self.pairs.push((key2.clone(), *value2));
-		}
-		self.charge += rhs.charge;
-	}
+    fn add_assign(&mut self, rhs: &Formula) {
+        for (key2, value2) in rhs.pairs.iter() {
+            let mut found = false;
+
+            for (key1, value1) in self.pairs.iter_mut() {
+                if key1 == key2 {
+                    *value1 += value2;
+                    found = true;
+                    break;
+                }
+            }
+
+            if !found {
+                self.pairs.push((key2.clone(), *value2));
+            }
+        }
+
+        self.charge += rhs.charge;
+    }
 }
 
 /*********************************************************************************************************************************/

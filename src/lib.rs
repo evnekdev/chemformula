@@ -1,6 +1,6 @@
 //lib.rs
 
-//! This crate helps to parse simple chemical formulas. Its original purpose was to facilitate composition calculations for thermochemical calculations using ChemApp, but it might be useful for general purposes as well. The parser is built using [`nom`] crate functionality. For now, the parsing functionality is limited to parsing simple formulas without parentheses and with float coefficients for elements.
+//! This crate helps to parse simple chemical formulas. Its original purpose was to facilitate composition calculations for thermochemical calculations using ChemApp, but it might be useful for general purposes as well. The parser is built using [`nom`] crate functionality. Limitations of the `0.1.0` version have been lifted - now the crate implements parsing of complex nested formulas.
 //! 
 //! Main functionality and structures:
 //! `Element` structure represents a chemical element from the Periodic table + two pseudoelements for chemical thermodynamics (charge compensation electrons and site vacancies).
