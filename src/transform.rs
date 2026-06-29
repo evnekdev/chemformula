@@ -4,7 +4,7 @@
 
 use std::str::FromStr;
 use std::collections::{BTreeSet};
-use nalgebra::{DVector, SVector, DMatrix, Dim, Storage, Matrix};
+use nalgebra::{DVector, DMatrix, Dim, Storage, Matrix};
 use nom::{Err, error::{Error,ErrorKind}};
 
 use crate::formula::Formula;
@@ -29,14 +29,6 @@ pub struct Transform {
 
 /*********************************************************************************************************************************/
 /*********************************************************************************************************************************/
-
-fn check_vector_d(vec: &mut DVector<f64>){
-	for k in 0..vec.len() {
-		if vec[k].abs() < THRESHOLD {
-			vec[k] = 0.0;
-		}
-	}
-}
 
 fn check_matrix_d(mat: &mut DMatrix<f64>) {
     for value in mat.iter_mut() {
