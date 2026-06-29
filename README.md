@@ -26,7 +26,7 @@ It is designed for:
 
 ## ✨ Features
 
-- 🧪 Parse chemical formulas (e.g., `H2O`, `Al2O3`, etc.)
+- 🧪 Parse chemical formulas (e.g., `H2O`, `Al2O3`, `Al(OH)4[-]`, etc.)
 - 🧱 Structured representation of formulas
 - 🔄 Formula transformation utilities
 - 🧬 Element-level abstraction
@@ -62,7 +62,7 @@ src/
 
 ```toml
 [dependencies]
-chemformula = "0.1"
+chemformula = "0.2"
 ```
 
 ---
@@ -70,11 +70,13 @@ chemformula = "0.1"
 ### 2. Basic usage
 
 ```rust
-use chemformula::parse;
+use std::str::FromStr;
+use chemformula::Formula;
 
-fn main() {
-    let formula = parse("H2O").unwrap();
-    println!("{:?}", formula);
+pub fn main(){
+	let name = "Al(OH)4[-]";
+	let frm = Formula::from_str(name).unwrap();
+	println!("name = {:?}, formula = {:?}, wmass = {:?}", &name, &frm, frm.wmass());
 }
 ```
 
@@ -93,7 +95,7 @@ let f = parse("Al2O3")?;
 ### Working with elements
 
 ```rust
-use chemformula::element::Element;
+use chemformula::Element;
 
 // Example usage (depends on your API)
 let oxygen = Element::new("O");
@@ -104,10 +106,26 @@ let oxygen = Element::new("O");
 ### Transforming formulas
 
 ```rust
-use chemformula::transform;
+use std::str::FromStr;
+use nalgebra::{dvector};
 
-// Example (conceptual)
-let new_formula = transform::normalize(f);
+use chemformula::Formula;
+use chemformula::Transform;
+
+pub fn main(){
+	let binitial = vec!["CaO", "Al2O3", "SiO2"];
+	let bfinal   = vec!["Ca", "Al", "Si", "O"];
+	let transform = Transform::new(&binitial, &bfinal, false).unwrap();
+	let compinitial = dvector![0.4, 0.5, 0.1]; // moles, initial
+	let compfinal = transform.transform_init2final(&compinitial, false, false, false);
+	println!("FINAL COMPOSITION (moles) = {:.6?}", &compfinal.data.as_slice());
+	let compfinal = transform.transform_init2final(&compinitial, false, false, true);
+	println!("FINAL COMPOSITION (Xfraction) = {:.6?}", &compfinal.data.as_slice());
+	let compfinal = transform.transform_init2final(&compinitial, false, true, false);
+	println!("FINAL COMPOSITION (grams) = {:.6?}", &compfinal.data.as_slice());
+	let compfinal = transform.transform_init2final(&compinitial, false, true, true);
+	println!("FINAL COMPOSITION (Wfraction) = {:.6?}", &compfinal.data.as_slice());
+}
 ```
 
 ---
@@ -139,26 +157,6 @@ Provides utilities for modifying formulas.
 ```bash
 cargo test
 ```
-
----
-
-## ⚠️ Limitations
-
-- May not yet support:
-  - Nested parentheses
-  - Charges / ions
-  - Isotopes
-- API still evolving
-
----
-
-## 📈 Roadmap
-
-- [ ] Support nested formulas (e.g., `(NH4)2SO4`)
-- [ ] Add molar mass calculations
-- [ ] Improve parser robustness
-- [ ] Add serialization (JSON, etc.)
-- [ ] Expand documentation and examples
 
 ---
 
