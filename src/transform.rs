@@ -51,7 +51,7 @@ fn check_matrix_d(mat: &mut DMatrix<f64>) {
 
 impl Transform {
 	/// Create a [`Transform`] struct based on a list of initial chemical formulas and a list of final chemical formulas
-	pub fn from_formula_names<T1: AsRef<str>, T2: AsRef<str>>(list1: &[T1], list2: &[T2], precompute: bool)->Result<Transform, Err<Error<String>>> {
+	pub fn new<T1: AsRef<str>, T2: AsRef<str>>(list1: &[T1], list2: &[T2], precompute: bool)->Result<Transform, Err<Error<String>>> {
 		let basis_initial: Vec<Formula> = list1.iter().map(|s| {Formula::from_str(s.as_ref()).map_err(|_| {Err::Error(Error::new(s.as_ref().to_string(),ErrorKind::MapRes,))})}).collect::<Result<_, _>>()?;
 		let basis_final:   Vec<Formula> = list2.iter().map(|s| {Formula::from_str(s.as_ref()).map_err(|_| {Err::Error(Error::new(s.as_ref().to_string(),ErrorKind::MapRes,))})}).collect::<Result<_, _>>()?;
 		let wmasses_initial : Vec<f64>  = basis_initial.iter().map(|frm| frm.wmass()).collect();
@@ -143,7 +143,7 @@ impl Transform {
 
 impl Default for Transform {
 	fn default()->Self{
-		return Transform::from_formula_names::<&str, &str>(&[], &[], false).unwrap();
+		return Transform::new::<&str, &str>(&[], &[], false).unwrap();
 	}
 }
 
