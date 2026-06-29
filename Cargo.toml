@@ -1,6 +1,6 @@
 [package]
 name = "chemformula"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 author = "Evgenii Nekhoroshev e.nekhoroshev@uq.edu.au, evgnekhoroshev@gmail.com"
