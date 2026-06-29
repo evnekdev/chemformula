@@ -67,7 +67,7 @@ chemformula = "0.2"
 
 ---
 
-### 2. Basic usage
+### 2. Basic usage (parsing a formula)
 
 ```rust
 use std::str::FromStr;
@@ -84,13 +84,7 @@ pub fn main(){
 
 ## 📊 Usage Examples
 
-### Parsing a formula
-
-```rust
-let f = parse("Al2O3")?;
-```
-
----
+Please refer to the `/examples` folder to see how the crate functionality works.
 
 ### Working with elements
 
@@ -98,7 +92,7 @@ let f = parse("Al2O3")?;
 use chemformula::Element;
 
 // Example usage (depends on your API)
-let oxygen = Element::new("O");
+let oxygen = Element::from_str("O");
 ```
 
 ---
