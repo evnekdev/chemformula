@@ -2,19 +2,34 @@
 
 //! An utility structure, `Transform` is introduced, to handle matrix transformation of one composition set (for example, ['CaO', 'SiO2', 'MgO']) to another (['Ca', 'Mg', 'Si', 'O']). Very useful for practical engineering calculations.
 
-use nalgebra::{DVector, SVector, DMatrix};
+use std::str::FromStr;
+use std::collections::{BTreeSet};
+use nalgebra::{DVector, SVector, DMatrix, Dim, Storage, Matrix};
+use nom::{Err, error::{Error,ErrorKind}};
 
 use crate::{conversion_matrix_s};
+use crate::formula::Formula;
+use crate::element::Element;
 
 const THRESHOLD : f64 = 1e-12;
 
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
 #[derive(Debug)]
 pub struct Transform {
-	basis_i: Vec<String>, // initial (atomic)
-	basis_f: Vec<String>, // final (end members)
-	pub f2i: DMatrix<f64>,
-	pub i2f: DMatrix<f64>,
+	basis_initial: Vec<Formula>,                    // initial (usually atomic)
+	basis_final:   Vec<Formula>,                    // final (usually endmembers)
+	wmasses_initial : Vec<f64>,                     // molar masses of the input basis
+	wmasses_final   : Vec<f64>,                     // molar masses of the output basis
+	coeffmatrix_initial : DMatrix<f64>,             // Initial basis coefficients
+	coeffmatrix_final : DMatrix<f64>,               // Final basis coefficients
+	precomputed_init2final : Option<DMatrix<f64>>,  // if `precompute` was set to `true`.
+	precomputed_final2init : Option<DMatrix<f64>>,  // if `precompute` was set to `true`.
 }
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
 
 fn check_vector_d(vec: &mut DVector<f64>){
 	for k in 0..vec.len() {
@@ -24,77 +39,116 @@ fn check_vector_d(vec: &mut DVector<f64>){
 	}
 }
 
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
 impl Transform {
 	/// Create a [`Transform`] struct based on a list of initial chemical formulas and a list of final chemical formulas
-	pub fn from_formulas_s<T1: AsRef<str>, T2: AsRef<str>>(list1: &[T1], list2: &[T2])->Transform{
-		return Transform {
-			basis_i: list1.iter().map(|s| String::from(s.as_ref())).collect(),
-			basis_f: list2.iter().map(|s| String::from(s.as_ref())).collect(),
-			i2f : conversion_matrix_s(list1, list2),
-			f2i : conversion_matrix_s(list2, list1),
-		};
+	pub fn from_formula_names<T1: AsRef<str>, T2: AsRef<str>>(list1: &[T1], list2: &[T2], precompute: bool)->Result<Transform, Err<Error<String>>> {
+		let basis_initial: Vec<Formula> = list1.iter().map(|s| {Formula::from_str(s.as_ref()).map_err(|_| {Err::Error(Error::new(s.as_ref().to_string(),ErrorKind::MapRes,))})}).collect::<Result<_, _>>()?;
+		let basis_final:   Vec<Formula> = list2.iter().map(|s| {Formula::from_str(s.as_ref()).map_err(|_| {Err::Error(Error::new(s.as_ref().to_string(),ErrorKind::MapRes,))})}).collect::<Result<_, _>>()?;
+		let wmasses_initial : Vec<f64>  = basis_initial.iter().map(|frm| frm.wmass()).collect();
+		let wmasses_final   : Vec<f64>  = basis_final.iter().map(|frm| frm.wmass()).collect();
+		let eset = element_set(&basis_initial, &basis_final);
+		let coeffmatrix_initial = coeffmatrix(&basis_initial, &eset);
+		let coeffmatrix_final   = coeffmatrix(&basis_final,   &eset);
+		let precomputed_init2final : Option<DMatrix<f64>> = if precompute {Some(matrix_solve(&coeffmatrix_initial, &coeffmatrix_final))} else {None};
+		let precomputed_final2init : Option<DMatrix<f64>> = if precompute {Some(matrix_solve(&coeffmatrix_final, &coeffmatrix_initial))} else {None};
+		return Ok(
+				Transform {
+					basis_initial,
+					basis_final,
+					wmasses_initial,
+					wmasses_final,
+					coeffmatrix_initial,
+					coeffmatrix_final,
+					precomputed_init2final,
+					precomputed_final2init,
+					});
 	}
 	
-	pub fn number_i(&self)->usize{
-		return self.basis_i.len();
+	/// Initial basis size
+	pub fn number_initial(&self)->usize{
+		return self.basis_initial.len();
 	}
 	
-	pub fn number_f(&self)->usize{
-		return self.basis_f.len();
+	/// Final basis size
+	pub fn number_final(&self)->usize{
+		return self.basis_final.len();
 	}
 	
-	/// apply transform final-to-initial, dyn-to-dyn
-	pub fn transform_f2i_d2d(&self, x_f: &DVector<f64>)->DVector<f64>{
-		let mut res = &self.f2i * x_f;
-		check_vector_d(&mut res);
-		return res;
+	/// molar masses of the input basis
+	pub fn wmasses_initial(&self)->&Vec<f64> {
+		return &self.wmasses_initial;
 	}
-	/// apply transform initial-to-final, dyn-to-dyn
-	pub fn transform_i2f_d2d(&self, x_i: &DVector<f64>)->DVector<f64>{
-		let mut res = &self.i2f * x_i;
-		check_vector_d(&mut res);
-		return res;
+	/// Molar masses of the output basis
+	pub fn wmasses_final(&self)->&Vec<f64> {
+		return &self.wmasses_final;
 	}
-	/// apply transform final-to-initial, static-to-dyn
-	pub fn transform_f2i_s2d<const N: usize>(&self, x_f: &SVector<f64,N>)->DVector<f64>{
-		let mut res = &self.f2i * x_f;
-		check_vector_d(&mut res);
-		return res;
+	
+	/// TODO
+	pub fn transform_init2final<R: Dim, C: Dim, S: Storage<f64,R,C>>(&self, matx: &Matrix<f64,R,C,S>, isweight_initial : bool, isweight_final : bool, isfraction: bool)->DMatrix<f64> {
+		todo!();
 	}
-	/// apply transform initial-to-final, static-to-dyn
-	pub fn transform_i2f_s2d<const N: usize>(&self, x_i: &SVector<f64,N>)->DVector<f64>{
-		let mut res = &self.i2f * x_i;
-		check_vector_d(&mut res);
-		return res;
+	
+	/// TODO
+	pub fn transform_final2init<R: Dim, C: Dim, S: Storage<f64,R,C>>(&self, matx: &Matrix<f64,R,C,S>, isweight_initial : bool, isweight_final : bool, isfraction: bool)->DMatrix<f64> {
+		todo!();
 	}
-	/// apply transform final-to-initial, dyn-to-static
-	pub fn transform_f2i_d2s<const N: usize>(&self, x_f: &DVector<f64>)->SVector<f64,N>{
-		let mut res = &self.f2i * x_f;
-		check_vector_d(&mut res);
-		return SVector::from(res.fixed_view::<N,1>(0,0));
-	}
-	/// apply transform initial-to-final, dyn-to-static
-	pub fn transform_i2f_d2s<const N: usize>(&self, x_i: &DVector<f64>)->SVector<f64,N>{
-		let mut res = &self.i2f * x_i;
-		check_vector_d(&mut res);
-		return SVector::from(res.fixed_view::<N,1>(0,0));
-	}
-	/// apply transform final-to-initial, static-to-static
-	pub fn transform_f2i_s2s<const N1: usize, const N2: usize>(&self, x_f: &SVector<f64,N1>)->SVector<f64,N2>{
-		let mut res = &self.f2i * x_f;
-		check_vector_d(&mut res);
-		return SVector::from(res.fixed_view::<N2,1>(0,0));
-	}
-	/// apply transform initial-to-final, static-to-static
-	pub fn transform_i2f_s2s<const N1: usize, const N2: usize>(&self, x_i: &SVector<f64,N1>)->SVector<f64,N2>{
-		let mut res = &self.i2f * x_i;
-		check_vector_d(&mut res);
-		return SVector::from(res.fixed_view::<N2,1>(0,0));
-	}
+	
 }
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
 
 impl Default for Transform {
 	fn default()->Self{
-		return Transform::from_formulas_s::<&str, &str>(&["O"], &["O"]);
+		return Transform::from_formula_names::<&str, &str>(&[], &[], false).unwrap();
 	}
 }
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
+/// Derives an ordered set of all elements occurring in a vector of [`Formula`] structures.
+fn element_set(basis1: &[Formula], basis2: &[Formula])->Vec<Element>{
+	let mut eset : BTreeSet<Element> = BTreeSet::new();
+	for k in 0..basis1.len(){
+		for (key, _) in basis1[k].pairs.iter(){
+			eset.insert(key.clone());
+		}
+	}
+	for k in 0..basis2.len(){
+		for (key, _) in basis2[k].pairs.iter(){
+			eset.insert(key.clone());
+		}
+	}
+	return eset.into_iter().collect();
+}
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
+/// Constructs a coefficient matrix for a formula basis
+fn coeffmatrix(basis: &[Formula], eset: &[Element])->DMatrix<f64> {
+	let mut dmat : DMatrix<f64> = DMatrix::zeros(eset.len(), basis.len());
+	for e in 0..eset.len(){
+		for b in 0..basis.len(){
+			dmat[(e,b)] = basis[b].coeff(&eset[e]) as f64;
+		}
+	}
+	return dmat;
+}
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
+/// presolve a matrix for multiplication
+fn matrix_solve(amat: &DMatrix<f64>, bmat: &DMatrix<f64>)->DMatrix<f64> {
+	assert_eq!(amat.nrows(),bmat.nrows(),"Source and target coefficient matrices must have the same number of element rows");
+    let qr = bmat.clone().qr();
+    qr.solve(amat).unwrap_or_else(|| {panic!("Could not solve basis transformation: target basis probably does not span source basis")})
+}
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
