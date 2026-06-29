@@ -3,6 +3,8 @@ use nalgebra::{dvector};
 use chemformula::*;
 
 pub fn main(){
+	todo!();
+	/*
 	let input = "H2SO4";
 	let res = Formula::from_str(input).unwrap();
 	println!("res = {:?}, wmass = {}", &res, res.wmass());
@@ -12,4 +14,5 @@ pub fn main(){
 	let comps = dvector![0.5, 0.6];
 	let comps_ = &matrix * comps;
 	println!("comps_ = {:?}", &comps_);
+	*/
 }

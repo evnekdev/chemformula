@@ -7,7 +7,6 @@ use std::collections::{BTreeSet};
 use nalgebra::{DVector, SVector, DMatrix, Dim, Storage, Matrix};
 use nom::{Err, error::{Error,ErrorKind}};
 
-use crate::{conversion_matrix_s};
 use crate::formula::Formula;
 use crate::element::Element;
 
@@ -37,6 +36,14 @@ fn check_vector_d(vec: &mut DVector<f64>){
 			vec[k] = 0.0;
 		}
 	}
+}
+
+fn check_matrix_d(mat: &mut DMatrix<f64>) {
+    for value in mat.iter_mut() {
+        if value.abs() < THRESHOLD {
+            *value = 0.0;
+        }
+    }
 }
 
 /*********************************************************************************************************************************/
@@ -86,14 +93,47 @@ impl Transform {
 		return &self.wmasses_final;
 	}
 	
-	/// TODO
-	pub fn transform_init2final<R: Dim, C: Dim, S: Storage<f64,R,C>>(&self, matx: &Matrix<f64,R,C,S>, isweight_initial : bool, isweight_final : bool, isfraction: bool)->DMatrix<f64> {
-		todo!();
+	/// Transform compositions from the initial basis to final using the following flags:
+	/// 
+	/// `isweight_initial` - `true` if the input compositions are in gram, moles otherwise
+	/// `isweight_final` - `true` if the output compositions must be in gram, moles otherwise
+	/// `isfraction` - normalize the final compositions (sum(xi) = 1.0)
+	pub fn transform_init2final<R: Dim, C: Dim, S: Storage<f64,R,C>>(&self, compositions: &Matrix<f64,R,C,S>, isweight_initial : bool, isweight_final : bool, isfraction: bool)->DMatrix<f64> {
+		assert_eq!(compositions.nrows(),self.number_initial(),"Input composition rows must match initial basis size");
+		let mut x = DMatrix::from_fn(compositions.nrows(),compositions.ncols(),|i, j| compositions[(i, j)],   );
+		// Convert input from weight amounts/fractions to mole amounts/fractions.
+		if isweight_initial {divide_weights(&mut x, &self.wmasses_initial);}
+		// Convert basis.
+		let mut y = match &self.precomputed_init2final {
+			Some(t) => t * x,
+			None => matrix_solve(&self.coeffmatrix_initial, &self.coeffmatrix_final) * x,
+		};
+		// Convert output from mole amounts/fractions to weight amounts/fractions.
+		if isweight_final {apply_weights(&mut y, &self.wmasses_final);}
+		if isfraction {normalize_columns(&mut y);}
+		check_matrix_d(&mut y);
+		return y;
 	}
 	
-	/// TODO
-	pub fn transform_final2init<R: Dim, C: Dim, S: Storage<f64,R,C>>(&self, matx: &Matrix<f64,R,C,S>, isweight_initial : bool, isweight_final : bool, isfraction: bool)->DMatrix<f64> {
-		todo!();
+	/// Transform compositions from the final basis to initial using the following flags:
+	/// 
+	/// `isweight_initial` - `true` if the input compositions are in gram, moles otherwise
+	/// `isweight_final` - `true` if the output compositions must be in gram, moles otherwise
+	/// `isfraction` - normalize the final compositions (sum(xi) = 1.0)
+	pub fn transform_final2init<R: Dim, C: Dim, S: Storage<f64,R,C>>(&self, compositions: &Matrix<f64,R,C,S>, isweight_initial : bool, isweight_final : bool, isfraction: bool)->DMatrix<f64> {
+		assert_eq!(compositions.nrows(),self.number_final(),"Input composition rows must match final basis size");
+    let mut x = DMatrix::from_fn(compositions.nrows(),compositions.ncols(),|i, j| compositions[(i, j)],);
+    // Here the input is in the final basis.
+    if isweight_final {divide_weights(&mut x, &self.wmasses_final);}
+    let mut y = match &self.precomputed_final2init {
+        Some(t) => t * x,
+        None => matrix_solve(&self.coeffmatrix_final, &self.coeffmatrix_initial) * x,
+    };
+    // Here the output is in the initial basis.
+    if isweight_initial {apply_weights(&mut y, &self.wmasses_initial);}
+    if isfraction {normalize_columns(&mut y);}
+    check_matrix_d(&mut y);
+    return y;
 	}
 	
 }
@@ -152,3 +192,31 @@ fn matrix_solve(amat: &DMatrix<f64>, bmat: &DMatrix<f64>)->DMatrix<f64> {
 
 /*********************************************************************************************************************************/
 /*********************************************************************************************************************************/
+
+/// Transform from moles to grams
+fn apply_weights(mat: &mut DMatrix<f64>, weights: &[f64]) {
+    assert_eq!(mat.nrows(),weights.len(),"Number of composition rows must match number of basis formulas");
+    for i in 0..mat.nrows() {for j in 0..mat.ncols() {mat[(i, j)] *= weights[i];}}
+}
+
+/// Transform from grams to moles
+fn divide_weights(mat: &mut DMatrix<f64>, weights: &[f64]) {
+    assert_eq!(mat.nrows(),weights.len(),"Number of composition rows must match number of basis formulas");
+    for i in 0..mat.nrows() {for j in 0..mat.ncols() {mat[(i, j)] /= weights[i];}}
+}
+
+/// Make sum(xi) = 1.0
+fn normalize_columns(mat: &mut DMatrix<f64>) {
+    for j in 0..mat.ncols() {
+        let mut sum = 0.0;
+        for i in 0..mat.nrows() {sum += mat[(i, j)];}
+        if sum.abs() > THRESHOLD {
+            for i in 0..mat.nrows() {mat[(i, j)] /= sum;}
+        }
+    }
+}
+
+
+/*********************************************************************************************************************************/
+/*********************************************************************************************************************************/
+
